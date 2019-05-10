@@ -1,9 +1,15 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <cstdio>
+#include <cstdlib>
 #include "sphere.h"
 #include "hitablelist.h"
 #include "material.h"
 #include "float.h"
 #include "camera.h"
+
+#define PI 3.1415
 
 vec3 color(const ray& r, hitable *world, int depth){
     hit_record rec;
@@ -26,26 +32,69 @@ vec3 color(const ray& r, hitable *world, int depth){
     }
 }
 
+void setup(char path[100], int *width, int *height, camera *cam) {
+    char line[5000];
+    char command[100];
+
+    FILE *file;
+
+    file = fopen(path, "r");
+
+    while(fscanf(file, " %s", command) != EOF) {
+        if(strcmp(command, "res") == 0) {
+            fscanf(file, "%d %d", width, height);
+
+        } else if(strcmp(command, "camera") == 0) {
+            int px, py, pz, tx, ty, tz, ux, uy, uz, fov, f;
+
+            fscanf(file, " %d %d %d %d %d %d %d %d %d %d %d", &px, &py, &pz, &tx, &ty, &tz, &ux, &uy, &uz, &fov, &f);
+
+            double fov_in_rad = PI * (fov/2.0)/180.0;
+            double screen_ratio = (double)(*(height)) / *(width);
+
+            double half_fovW = abs(tan(fov_in_rad));
+            double half_fovH = abs(screen_ratio * half_fovW);
+
+            cam->origin = vec3(px, py, pz);
+            cam->lower_left_corner = vec3((-1)*half_fovW, (-1)*half_fovH, 0.0);
+            cam->horizontal = vec3( half_fovW*2, 0.0, 0.0);
+            cam->vertical = vec3(0.0, half_fovH*2, 0.0);
+
+            // std::cout << cam->horizontal.x() << " " << cam->vertical.y();
+
+        } else if(strcmp(command, "material") == 0) {
+            char name[20];
+            int r, g, b, kd, ks, ke, alpha;
+
+            fscanf(file, " %s %d %d %d %d %d %d %d", name, &r, &g, &b, &kd, &ks, &ke, &alpha);
+
+        } else if(strcmp(command, "sphere")) {
+            //puts("to do");
+        }
+    }
+}
+
 int main() {
     int nx = 200;
     int ny = 100;
     int ns = 100;
 
-    int cameraSizeX = 4.0;
-    int cameraSizeY = 2.0;
-
-    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-
     hitable *list[4];
 
     list[0] = new sphere(vec3(0, 0, -1)      , 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
     list[1] = new sphere(vec3(0, -100.5, -1 ), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
-    list[2] = new sphere(vec3(1, 0, -1)      , 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.1));
+    list[2] = new sphere(vec3(1, 0, -1)      , 0.5, new metal(vec3(1.0, 0.0, 0.0), 0.1));
     list[3] = new sphere(vec3(-1, 0, -1)     , 0.5, new metal(vec3(0.8, 0.8, 0.8), 0.7));
     
     hitable *world = new hitable_list(list, 4);
 
     camera cam;
+
+    char filePath[100] = "scene.txt";
+
+    setup(filePath, &nx, &ny, &cam);
+    
+    std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
