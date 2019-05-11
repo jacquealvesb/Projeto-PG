@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include "sphere.h"
 #include "hitablelist.h"
 #include "material.h"
