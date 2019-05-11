@@ -1,5 +1,5 @@
 #resolução
-res 200 100
+res 800 600
 
 #câmera
-camera 0 0 1 1 1 1 2 2 2 90 999
+camera -2 2 1 0 0 -1 0 1 0 90 999

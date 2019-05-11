@@ -49,16 +49,31 @@ void setup(char path[100], int *width, int *height, camera *cam) {
 
             fscanf(file, " %d %d %d %d %d %d %d %d %d %d %d", &px, &py, &pz, &tx, &ty, &tz, &ux, &uy, &uz, &fov, &f);
 
+            // px, py, pz = lookFrom - "where the camera is"
+            // tx, ty, tz = lookAt - "where the camera is pointing to" or "target point/direction coordinates"
+            // ux, uy, uz = rotation - the rotation happens around the lookFrom-lookAt axis. It's like looking to a fixed place but tilting your head around your nose.
+            // fov = Field of View - (in degrees) how much can you see through the window
+
+            vec3 lookFrom = vec3(float(px), float(py), float(pz));
+            vec3 lookAt = vec3(float(tx), float(ty), float(tz));
+            vec3 vup = vec3(float(ux), float(uy), float(uz));
+
+            vec3 w = unit_vector(lookFrom - lookAt);
+            vec3 u = unit_vector(cross(vup, w));
+            vec3 v = cross(w, u);
+
+
             double fov_in_rad = PI * (fov/2.0)/180.0;
             double screen_ratio = (double)(*(height)) / *(width);
 
-            double half_fovW = abs(tan(fov_in_rad));
-            double half_fovH = abs(screen_ratio * half_fovW);
+            double half_wid = abs(tan(fov_in_rad));
+            double half_hei = abs(screen_ratio * half_wid);
 
-            cam->origin = vec3(px, py, pz);
-            cam->lower_left_corner = vec3((-1)*half_fovW, (-1)*half_fovH, 0.0);
-            cam->horizontal = vec3( half_fovW*2, 0.0, 0.0);
-            cam->vertical = vec3(0.0, half_fovH*2, 0.0);
+            cam->origin = lookFrom;
+            cam->lower_left_corner = vec3((-1)*half_wid, (-1)*half_hei, -1.0);
+            cam->lower_left_corner = cam->origin - half_wid*u - half_hei*v - w;
+            cam->horizontal = 2*half_wid*u;
+            cam->vertical = 2*half_hei*v;
 
             // std::cout << cam->horizontal.x() << " " << cam->vertical.y();
 
