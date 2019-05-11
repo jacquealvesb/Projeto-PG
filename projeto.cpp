@@ -34,7 +34,6 @@ vec3 color(const ray& r, hitable *world, int depth){
 }
 
 void setup(char path[100], int *width, int *height, camera *cam) {
-    char line[5000];
     char command[100];
 
     FILE *file;
