@@ -6,20 +6,21 @@
 #include <cstring>
 #include "sphere.h"
 #include "hitablelist.h"
-#include "material.h"
+#include "genericMaterial.h"
 #include "float.h"
 #include "camera.h"
 
 #define PI 3.1415
 
-vec3 color(const ray& r, hitable *world, int depth){
+vec3 color(const ray& r, hitable *world, int depth, vec3 light){
     hit_record rec;
 
   	if(world->hit(r, 0.001, MAXFLOAT, rec)) {
         ray scattered;
         vec3 attenuation;
-        if (depth < 50 && rec.mat->scatter(r, rec, attenuation, scattered)) {
-            return attenuation*color(scattered, world, depth+1);
+        if (depth < 2 && rec.mat->scatter(r, rec, attenuation, scattered, light)) {
+            //exit(1);
+            return attenuation*color(scattered, world, depth+1, light);
         }
         else {
             return vec3(0,0,0);
@@ -94,14 +95,15 @@ int main() {
     int ny = 100;
     int ns = 100;
 
-    hitable *list[4];
+    hitable *list[5];
 
-    list[0] = new sphere(vec3(0, 0, -1)      , 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
-    list[1] = new sphere(vec3(0, -100.5, -1 ), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
-    list[2] = new sphere(vec3(1, 0, -1)      , 0.5, new metal(vec3(1.0, 0.0, 0.0), 0.1));
-    list[3] = new sphere(vec3(-1, 0, -1)     , 0.5, new metal(vec3(0.8, 0.8, 0.8), 0.7));
+    list[0] = new sphere(vec3(0, -100.5, -1 ), 100, new Material(vec3(0.9, 0.9, 0.9), 0.5, 1.0, 1.0, 0.2) );
+    list[1] = new sphere(vec3(0, 0, -1)      , 0.5, new Material(vec3(0.8, 0.3, 0.3), 0.5, 0.0, 1.0, 0.1) );
+    list[2] = new sphere(vec3(2, 0, -1)      , 0.5, new Material(vec3(1.0, 0.0, 0.0), 0.5, 0.5, 0.0, 0.3) );
+    list[3] = new sphere(vec3(-2, 0, -1)     , 0.5, new Material(vec3(0.8, 0.8, 0.8), 0.5, 0.0, 0.5, 0.0) );
+    list[4] = new sphere(vec3(0, 0,  -3)     , 0.5, new Material(vec3(0.8, 0.8, 0.8), 0.5, 0.0, 0.5, 1.0) );
     
-    hitable *world = new hitable_list(list, 4);
+    hitable *world = new hitable_list(list, 5);
 
     camera cam;
 
@@ -110,6 +112,8 @@ int main() {
     setup(filePath, &nx, &ny, &cam);
     
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+
+    vec3 light = vec3(0, 50, -5);
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
@@ -120,7 +124,7 @@ int main() {
 
                 ray r = cam.get_ray(u, v);
                 vec3 p = r.point_at_parameter(2.0);
-                col += color(r, world, 0);
+                col += color(r, world, 0, light);
             }
 
             col /= float(ns);
@@ -129,6 +133,10 @@ int main() {
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);
             int ib = int(255.99*col[2]);
+
+            if(ir < 0 ) ir = 255.0;
+            if(ig < 0 ) ig = 255.0;
+            if(ib < 0 ) ib = 255.0;
 
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
