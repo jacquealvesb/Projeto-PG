@@ -98,7 +98,7 @@ int main() {
 
     list[0] = new sphere(vec3(0, 0, -1)      , 0.5, new lambertian(vec3(0.8, 0.3, 0.3)));
     list[1] = new sphere(vec3(0, -100.5, -1 ), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
-    list[2] = new sphere(vec3(1, 0, -1)      , 0.5, new metal(vec3(1.0, 0.0, 0.0), 0.1));
+    list[2] = new sphere(vec3(1, 0, -1)      , 0.5, new metal(vec3(1.0, 0.0, 0.0), 0));
     list[3] = new sphere(vec3(-1, 0, -1)     , 0.5, new metal(vec3(0.8, 0.8, 0.8), 0.7));
     
     hitable *world = new hitable_list(list, 4);
