@@ -97,11 +97,14 @@ int main() {
 
     hitable *list[5];
 
+    // "Chão"
     list[0] = new sphere(vec3(0, -100.5, -1 ), 100, new Material(vec3(0.9, 0.9, 0.9), 0.5, 1.0, 1.0, 0.2) );
-    list[1] = new sphere(vec3(0, 0, -1)      , 0.5, new Material(vec3(0.8, 0.3, 0.3), 0.5, 0.0, 1.0, 0.1) );
+    // Esferas Verde, Vermelha e Azul respectivamente
+    list[1] = new sphere(vec3(0, 0, -1)      , 0.5, new Material(vec3(0.0, 0.1, 0.0), 0.5, 0.0, 1.0, 0.1) );
     list[2] = new sphere(vec3(2, 0, -1)      , 0.5, new Material(vec3(1.0, 0.0, 0.0), 0.5, 0.5, 0.0, 0.3) );
-    list[3] = new sphere(vec3(-2, 0, -1)     , 0.5, new Material(vec3(0.8, 0.8, 0.8), 0.5, 0.0, 0.5, 0.0) );
-    list[4] = new sphere(vec3(0, 0,  -3)     , 0.5, new Material(vec3(0.8, 0.8, 0.8), 0.5, 0.0, 0.5, 1.0) );
+    list[3] = new sphere(vec3(-2, 0, -1)     , 0.5, new Material(vec3(0.0, 0.0, 1.0), 0.5, 0.0, 0.5, 0.0) );
+    // Esfera Roxa
+    list[4] = new sphere(vec3(0, 1,  -4)     , 2.0, new Material(vec3(1.0, 0.0, 1.0), 0.5, 0.0, 0.5, 1.0) );
     
     hitable *world = new hitable_list(list, 5);
 
