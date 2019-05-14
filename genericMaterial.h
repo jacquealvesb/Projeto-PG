@@ -118,10 +118,7 @@ class Material{
 
         }
 
-        virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered, vec3 light){
-            // quando coloca isso as bolas tem reflexo #1
-            vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
-
+        virtual vec3 scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered, vec3 light){
             // scattered = ray(rec.p, (this->ks())*reflected + (this->kd())*random_in_unit_sphere());
 
             // attenuation = (this->color);
@@ -143,13 +140,10 @@ class Material{
             if(dot(normal, r_in.direction()*(-1)) < 0){
                 normal = normal*(-1);
             }
-            // quando coloca isso as bolas tem reflexo #2
-            scattered = ray(rec.p, reflected + (this->kd())*random_in_unit_sphere());
 
             attenuation = color + this->phong(direction, normal, lightRayDir);
 
-            // quando coloca isso no lugar do que tava (abaixo) as bolas tem reflexo #3
-            return (dot(scattered.direction(), rec.normal) > 0 || (this->kd() >= 1.0));
+            return attenuation;
             // return (dot(attenuation, rec.normal) > 0);
             // return true
         }

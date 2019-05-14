@@ -18,9 +18,10 @@ vec3 color(const ray& r, hitable *world, int depth, vec3 light){
   	if(world->hit(r, 0.001, MAXFLOAT, rec)) {
         ray scattered;
         vec3 attenuation;
-        if (depth < 2 && rec.mat->scatter(r, rec, attenuation, scattered, light)) {
+        if (depth < 2) {
             //exit(1);
-            return attenuation*color(scattered, world, depth+1, light);
+            //return attenuation*color(scattered, world, depth+1, light);
+            return rec.mat->scatter(r, rec, attenuation, scattered, light);
         }
         else {
             return vec3(0,0,0);
@@ -101,8 +102,8 @@ int main() {
     list[0] = new sphere(vec3(0, -100.5, -1 ), 100, new Material(vec3(0.9, 0.9, 0.9), 0.5, 1.0, 1.0, 0.2) );
     // Esferas Verde, Vermelha e Azul respectivamente
     list[1] = new sphere(vec3(0, 0, -1)      , 0.5, new Material(vec3(0.0, 0.1, 0.0), 0.5, 0.0, 1.0, 0.1) );
-    list[2] = new sphere(vec3(2, 0, -1)      , 0.5, new Material(vec3(1.0, 0.0, 0.0), 0.5, 0.5, 0.0, 0.3) );
-    list[3] = new sphere(vec3(-2, 0, -1)     , 0.5, new Material(vec3(0.0, 0.0, 1.0), 0.5, 0.0, 0.5, 0.0) );
+    list[2] = new sphere(vec3(2, 0, -1)      , 0.75, new Material(vec3(1.0, 0.0, 0.0), 0.5, 0.5, 0.0, 0.3) );
+    list[3] = new sphere(vec3(-2, 0, -1)     , 0.25, new Material(vec3(0.0, 0.0, 1.0), 0.5, 0.0, 0.5, 0.0) );
     // Esfera Roxa
     list[4] = new sphere(vec3(0, 1,  -4)     , 2.0, new Material(vec3(1.0, 0.0, 1.0), 0.5, 0.0, 0.5, 1.0) );
     
@@ -116,7 +117,7 @@ int main() {
     
     std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 
-    vec3 light = vec3(0, 50, -5);
+    vec3 light = vec3(0, 15, 5);
 
     for (int j = ny-1; j >= 0; j--) {
         for (int i = 0; i < nx; i++) {
@@ -138,8 +139,8 @@ int main() {
             int ib = int(255.99*col[2]);
 
             if(ir < 0 ) ir = 255.0;
-            if(ig < 0 ) ig = 255.0;
-            if(ib < 0 ) ib = 255.0;
+            if(ig < 0 ) ig = 215.0;
+            if(ib < 0 ) ib = 0.0;
 
             std::cout << ir << " " << ig << " " << ib << "\n";
         }
