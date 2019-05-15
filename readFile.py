@@ -1,73 +1,71 @@
-file = open('dale.txt', 'r')
+def readFile(path):
+	file = open(path, 'r')
 
-# Res
-resRead = file.readline().rstrip().split(' ')
-res = {
-	'width': resRead[0],
-	'height': resRead[1]
-}
-
-# Cameras
-cameraRead = file.readline().rstrip().split(' ')
-camera = {
-	'x': cameraRead[0],
-	'y': cameraRead[1],
-	'z': cameraRead[2]
-}
-target = {
-	'x': cameraRead[3],
-	'y': cameraRead[4],
-	'z': cameraRead[5]
-}
-up = {
-	'x': cameraRead[6],
-	'y': cameraRead[7],
-	'z': cameraRead[8]
-}
-fov = cameraRead[9]
-f = cameraRead[10]
-
-# Materials
-line = '='
-materials = {}
-while True:
-	line = file.readline()
-	if len(line) < 2:
-		break
-
-	materialLine = line.rstrip().split(' ')
-
-	materials[materialLine[0]] = {
-		'r': materialLine[1],
-		'g': materialLine[2],
-		'b': materialLine[3],
-		'kd': materialLine[4],
-		'ks': materialLine[5],
-		'ke': materialLine[6],
-		'alpha': materialLine[7]
+	# Res
+	resRead = file.readline().rstrip().split(' ')
+	res = {
+		'width': int(resRead[0]),
+		'height': int(resRead[1])
 	}
 
-# Objects
-line = '='
-objs = []
-while True:
-	line = file.readline()
-	if len(line) < 2:
-		break
-	
-	line = file.readline()
-	objLine = line.rstrip().split(' ')
-	obj = {
-		'type': objLine[0],
-		'cx': objLine[1],
-		'cy': objLine[2],
-		'cz': objLine[3],
-		'r': objLine[4],
-		'material': objLine[5]
+	# Cameras
+	cameraRead = file.readline().rstrip().split(' ')
+	camera = {
+		'x': float(cameraRead[0]),
+		'y': float(cameraRead[1]),
+		'z': float(cameraRead[2])
 	}
-	objs.append(obj)
+	target = {
+		'x': float(cameraRead[3]),
+		'y': float(cameraRead[4]),
+		'z': float(cameraRead[5])
+	}
+	up = {
+		'x': float(cameraRead[6]),
+		'y': float(cameraRead[7]),
+		'z': float(cameraRead[8])
+	}
+	fov = float(cameraRead[9])
+	f = float(cameraRead[10])
 
+	# Materials
+	line = '='
+	materials = {}
+	while True:
+		line = file.readline()
+		if len(line) < 2:
+			break
 
-print(materials)
-print(objs)
+		materialLine = line.rstrip().split(' ')
 
+		materials[materialLine[0]] = {
+			'r': float(materialLine[1]),
+			'g': float(materialLine[2]),
+			'b': float(materialLine[3]),
+			'kd': float(materialLine[4]),
+			'ks': float(materialLine[5]),
+			'ke': float(materialLine[6]),
+			'alpha': float(materialLine[7])
+		}
+
+	# Objects
+	line = '='
+	objs = []
+	while True:
+		line = file.readline()
+		if len(line) < 2:
+			break
+		
+		line = file.readline()
+		objLine = line.rstrip().split(' ')
+		obj = {
+			'type': objLine[0],
+			'cx': float(objLine[1]),
+			'cy': float(objLine[2]),
+			'cz': float(objLine[3]),
+			'r': float(objLine[4]),
+			'material': objLine[5]
+		}
+		objs.append(obj)
+
+	return (res, camera, target, up, fov, f, materials, objs)

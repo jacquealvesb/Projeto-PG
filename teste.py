@@ -1,7 +1,31 @@
 import numpy as np
+from readFile import readFile
 
-w = 400
-h = 300
+(res, camera, target, up, fov, f, materials, objs) = readFile('file.txt')
+
+w = res['width']
+h = res['height']
+
+# Light position and color.
+L = np.array([5., 5., -10.])
+color_light = np.ones(3)
+
+# Default light and material parameters.
+ambient = .05
+kd = 1.
+ks = 1.
+alpha = 50
+
+depth_max = 5  # Maximum number of light reflections.
+col = np.zeros(3)  # Current color.
+O = np.array([camera['x'], camera['y'], camera['z']])  # Camera.
+Q = np.array([target['x'], target['y'], target['z']])  # Camera pointing to.
+img = np.zeros((h, w, 3))
+
+r = float(w) / h
+# Screen coordinates: x0, y0, x1, y1.
+S = (-1., -1. / r + .25, 1., 1. / r + .25)
+
 
 def normalize(x):
     x /= np.linalg.norm(x)
@@ -83,56 +107,35 @@ def trace_ray(rayO, rayD):
     if l and min(l) < np.inf:
         return
     # Start computing the color.
-    col_ray = ambient
+    col_ray = ambient * color_light
+    # Emissive color
+    # col_ray += obj['ke'] * color_light
     # Lambert shading (diffuse).
-    col_ray += obj.get('diffuse_c', diffuse_c) * max(np.dot(N, toL), 0) * color
-    # Blinn-Phong shading (specular).
-    col_ray += obj.get('specular_c', specular_c) * max(np.dot(N, normalize(toL + toO)), 0) ** specular * color_light
+    col_ray += obj.get('kd', kd) * max(np.dot(N, toL), 0) * color
+    # Blinn-Phong shading (alpha).
+    col_ray += obj.get('ks', ks) * max(np.dot(N, normalize(toL + toO)), 0) ** obj.get('alpha',alpha) * color_light
     return obj, M, N, col_ray
 
-def add_sphere(position, radius, color, diffuse_c = 2):
-    if diffuse_c == 2:
-        return dict(type='sphere', position=np.array(position), 
-            radius=np.array(radius), color=np.array(color), reflection=.5, diffuse_c=0.5)
-    else:
-        return dict(type='sphere', position=np.array(position), 
-            radius=np.array(radius), color=np.array(color), reflection=.5)
+def add_sphere(position, radius, color, kd, ks, ke, alpha):
+    return dict(type='sphere', position=np.array(position), 
+        radius=np.array(radius), color=np.array(color), reflection=.5,
+        ks=ks, ke=ke, alpha=alpha, kd=kd)
     
 def add_plane(position, normal):
     return dict(type='plane', position=np.array(position), 
         normal=np.array(normal),
         color=lambda M: (color_plane0 
             if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane1),
-        diffuse_c=.75, specular_c=.5, reflection=.25)
+        kd=.75, ks=.5, reflection=.25)
     
 # List of objects.
 color_plane0 = 1. * np.ones(3)
 color_plane1 = 0. * np.ones(3)
-scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.], 0),
-         add_sphere([-.75, .1, 2.25], .6, [.5, .223, .5]),
-         add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184]),
+scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.], 1., 1., 0, 50),
+         add_sphere([-.75, .1, 2.25], .6, [.5, .223, .5], .5, 1., 0, 50),
+         add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184], .5, 1., 0, 50),
          add_plane([0., -.5, 0.], [0., 1., 0.]),
     ]
-
-# Light position and color.
-L = np.array([5., 5., -10.])
-color_light = np.ones(3)
-
-# Default light and material parameters.
-ambient = .05
-diffuse_c = 1.
-specular_c = 1.
-specular = 50
-
-depth_max = 5  # Maximum number of light reflections.
-col = np.zeros(3)  # Current color.
-O = np.array([0., 0.35, -1.])  # Camera.
-Q = np.array([0., 0., 0.])  # Camera pointing to.
-img = np.zeros((h, w, 3))
-
-r = float(w) / h
-# Screen coordinates: x0, y0, x1, y1.
-S = (-1., -1. / r + .25, 1., 1. / r + .25)
 
 # Loop through all pixels.
 for i, x in enumerate(np.linspace(S[0], S[2], w)):
@@ -160,4 +163,4 @@ for i, x in enumerate(np.linspace(S[0], S[2], w)):
 
 from PIL import Image
 im = Image.fromarray((255 * img).astype(np.uint8), "RGB")
-im.save("fig.png")
+im.save("fig2.png")
