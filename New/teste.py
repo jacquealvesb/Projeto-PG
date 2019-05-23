@@ -109,7 +109,7 @@ def trace_ray(rayO, rayD):
     # Start computing the color.
     col_ray = ambient * color_light
     # Emissive color
-    # col_ray += obj['ke'] * color_light
+    col_ray += obj.get('ke', .0) * color_light
     # Lambert shading (diffuse).
     col_ray += obj.get('kd', kd) * max(np.dot(N, toL), 0) * color
     # Blinn-Phong shading (alpha).
@@ -118,7 +118,7 @@ def trace_ray(rayO, rayD):
 
 def add_sphere(position, radius, material):
     sphereMaterial = materials[material]
-    
+
     color = [sphereMaterial['r'], sphereMaterial['g'], sphereMaterial['b']]
     kd = sphereMaterial['kd']
     ks = sphereMaterial['ks']
