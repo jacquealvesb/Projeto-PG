@@ -24,7 +24,7 @@ img = np.zeros((h, w, 3))
 
 r = float(w) / h
 # Screen coordinates: x0, y0, x1, y1.
-S = (-1., -1. / r + .25, 1., 1. / r + .25)
+S = (-fov/90.0, -(fov/90.0) / r + .25, fov/90.0, (fov/90.0) / r + .25)
 
 
 def normalize(x):
