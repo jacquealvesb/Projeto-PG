@@ -53,10 +53,10 @@ def readFile(path):
 	objs = []
 	while True:
 		line = file.readline()
+
 		if len(line) < 2:
 			break
 		
-		line = file.readline()
 		objLine = line.rstrip().split(' ')
 		obj = {
 			'type': objLine[0],
@@ -66,6 +66,7 @@ def readFile(path):
 			'r': float(objLine[4]),
 			'material': objLine[5]
 		}
+		
 		objs.append(obj)
 
 	return (res, camera, target, up, fov, f, materials, objs)
