@@ -116,7 +116,15 @@ def trace_ray(rayO, rayD):
     col_ray += obj.get('ks', ks) * max(np.dot(N, normalize(toL + toO)), 0) ** obj.get('alpha',alpha) * color_light
     return obj, M, N, col_ray
 
-def add_sphere(position, radius, color, kd, ks, ke, alpha):
+def add_sphere(position, radius, material):
+    sphereMaterial = materials[material]
+    
+    color = [sphereMaterial['r'], sphereMaterial['g'], sphereMaterial['b']]
+    kd = sphereMaterial['kd']
+    ks = sphereMaterial['ks']
+    ke = sphereMaterial['ke']
+    alpha = sphereMaterial['alpha']
+
     return dict(type='sphere', position=np.array(position), 
         radius=np.array(radius), color=np.array(color), reflection=.5,
         ks=ks, ke=ke, alpha=alpha, kd=kd)
@@ -131,11 +139,20 @@ def add_plane(position, normal):
 # List of objects.
 color_plane0 = 1. * np.ones(3)
 color_plane1 = 0. * np.ones(3)
-scene = [add_sphere([.75, .1, 1.], .6, [0., 0., 1.], 1., 1., 0, 50),
-         add_sphere([-.75, .1, 2.25], .6, [.5, .223, .5], .5, 1., 0, 50),
-         add_sphere([-2.75, .1, 3.5], .6, [1., .572, .184], .5, 1., 0, 50),
-         add_plane([0., -.5, 0.], [0., 1., 0.]),
-    ]
+
+scene = [add_plane([0., -.5, 0.], [0., 1., 0.]),]
+
+for obj in objs:
+    if obj['type'] == "esfera":
+        position = [obj['cx'], obj['cy'], obj['cz']]
+        radius = obj['r']
+        material = obj['material']
+
+        sphere = add_sphere(position, radius, material)
+
+        scene.append(sphere)
+        
+
 
 # Loop through all pixels.
 for i, x in enumerate(np.linspace(S[0], S[2], w)):
