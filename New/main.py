@@ -1,13 +1,15 @@
 import numpy as np
 from readFile import readFile
 
-(res, camera, target, up, fov, f, materials, objs) = readFile('file.txt')
+# Read input file
+(res, camera, target, up, fov, f, materials, objs) = readFile('input.txt')
 
+# Defining screen size
 w = res['width']
 h = res['height']
 
-# Light position and color.
-L = np.array([5., 5., -10.])
+# Light position and color
+light_position = np.array([5., 5., -10.])
 color_light = np.ones(3)
 
 # Default light and material parameters.
@@ -18,37 +20,38 @@ alpha = 50
 
 depth_max = 5  # Maximum number of light reflections.
 col = np.zeros(3)  # Current color.
-O = np.array([camera['x'], camera['y'], camera['z']])  # Camera.
+origin = np.array([camera['x'], camera['y'], camera['z']])  # Camera.
 Q = np.array([target['x'], target['y'], target['z']])  # Camera pointing to.
 img = np.zeros((h, w, 3))
 
-r = float(w) / h
+# Aspect ratio
+aspectRatio = float(w) / h
 # Screen coordinates: x0, y0, x1, y1.
-S = (-fov/90.0, -(fov/90.0) / r + .25, fov/90.0, (fov/90.0) / r + .25)
+S = (-fov/90.0, -(fov/90.0) / aspectRatio + .25, fov/90.0, (fov/90.0) / aspectRatio + .25)
 
 
 def normalize(x):
     x /= np.linalg.norm(x)
     return x
 
-def intersect_plane(O, D, P, N):
-    # Return the distance from O to the intersection of the ray (O, D) with the 
+def intersect_plane(origin, D, P, N):
+    # Return the distance from origin to the intersection of the ray (origin, D) with the 
     # plane (P, N), or +inf if there is no intersection.
-    # O and P are 3D points, D and N (normal) are normalized vectors.
+    # origin and P are 3D points, D and N (normal) are normalized vectors.
     denom = np.dot(D, N)
     if np.abs(denom) < 1e-6:
         return np.inf
-    d = np.dot(P - O, N) / denom
+    d = np.dot(P - origin, N) / denom
     if d < 0:
         return np.inf
     return d
 
-def intersect_sphere(O, D, S, R):
-    # Return the distance from O to the intersection of the ray (O, D) with the 
+def intersect_sphere(origin, D, S, R):
+    # Return the distance from origin to the intersection of the ray (origin, D) with the 
     # sphere (S, R), or +inf if there is no intersection.
-    # O and S are 3D points, D (direction) is a normalized vector, R is a scalar.
+    # origin and S are 3D points, D (direction) is a normalized vector, R is a scalar.
     a = np.dot(D, D)
-    OS = O - S
+    OS = origin - S
     b = 2 * np.dot(D, OS)
     c = np.dot(OS, OS) - R * R
     disc = b * b - 4 * a * c
@@ -62,11 +65,11 @@ def intersect_sphere(O, D, S, R):
             return t1 if t0 < 0 else t0
     return np.inf
 
-def intersect(O, D, obj):
+def intersect(origin, D, obj):
     if obj['type'] == 'plane':
-        return intersect_plane(O, D, obj['position'], obj['normal'])
+        return intersect_plane(origin, D, obj['position'], obj['normal'])
     elif obj['type'] == 'sphere':
-        return intersect_sphere(O, D, obj['position'], obj['radius'])
+        return intersect_sphere(origin, D, obj['position'], obj['radius'])
 
 def get_normal(obj, M):
     # Find normal.
@@ -99,8 +102,8 @@ def trace_ray(rayO, rayD):
     # Find properties of the object.
     N = get_normal(obj, M)
     color = get_color(obj, M)
-    toL = normalize(L - M)
-    toO = normalize(O - M)
+    toL = normalize(light_position - M)
+    toO = normalize(origin - M)
     # Shadow: find if the point is shadowed or not.
     l = [intersect(M + N * .0001, toL, obj_sh) 
             for k, obj_sh in enumerate(scene) if k != obj_idx]
@@ -112,7 +115,7 @@ def trace_ray(rayO, rayD):
     col_ray += obj.get('ke', .0) * color_light
     # Lambert shading (diffuse).
     col_ray += obj.get('kd', kd) * max(np.dot(N, toL), 0) * color
-    # Blinn-Phong shading (alpha).
+    # Phong shading (alpha).
     col_ray += obj.get('ks', ks) * max(np.dot(N, normalize(toL + toO)), 0) ** obj.get('alpha',alpha) * color_light
     return obj, M, N, col_ray
 
@@ -136,12 +139,13 @@ def add_plane(position, normal):
             if (int(M[0] * 2) % 2) == (int(M[2] * 2) % 2) else color_plane1),
         kd=.75, ks=.5, reflection=.25)
     
-# List of objects.
+# Setting ground
 color_plane0 = 1. * np.ones(3)
 color_plane1 = 0. * np.ones(3)
 
 scene = [add_plane([0., -.5, 0.], [0., 1., 0.]),]
 
+# Adding objects to the scene
 for obj in objs:
     if obj['type'] == "esfera":
         position = [obj['cx'], obj['cy'], obj['cz']]
@@ -151,8 +155,6 @@ for obj in objs:
         sphere = add_sphere(position, radius, material)
 
         scene.append(sphere)
-        
-
 
 # Loop through all pixels.
 for i, x in enumerate(np.linspace(S[0], S[2], w)):
@@ -161,9 +163,9 @@ for i, x in enumerate(np.linspace(S[0], S[2], w)):
     for j, y in enumerate(np.linspace(S[1], S[3], h)):
         col[:] = 0
         Q[:2] = (x, y)
-        D = normalize(Q - O)
+        D = normalize(Q - origin)
         depth = 0
-        rayO, rayD = O, D
+        rayO, rayD = origin, D
         reflection = 1.
         # Loop through initial and secondary rays.
         while depth < depth_max:
@@ -179,5 +181,7 @@ for i, x in enumerate(np.linspace(S[0], S[2], w)):
         img[h - j - 1, i, :] = np.clip(col, 0, 1)
 
 from PIL import Image
+
+# Convets the array of pixels to a png image
 im = Image.fromarray((255 * img).astype(np.uint8), "RGB")
-im.save("fig2.png")
+im.save("output.png")
