@@ -12,7 +12,7 @@ pip install Pillow==2.2.2
 
 ## Descrição do projeto
 
-É lido um arquivo de descrição de cena contendo informações da câmera e das superfícies (geometria e materiais) e a cena é criada com tais configurações. O modelo de iluminação utilizado é o de Phong.
+É lido um arquivo de descrição de cena contendo informações da câmera e das superfícies (geometria e materiais) e a cena é criada com tais configurações usando o algoritmo de Ray Tracing. O modelo de iluminação utilizado é o de Phong.
 
 ### Parâmetros da câmera
 
