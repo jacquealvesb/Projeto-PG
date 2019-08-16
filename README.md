@@ -16,7 +16,8 @@ pip install Pillow==2.2.2
 
 ### Parâmetros da câmera
 
-* Tamanho (w h)
+* Largura (w)
+* Altura (h)
 * Field of View (fov)
 * Posição (pos - px py pz)
 * Ponto de Mira (target - tx ty tz)
