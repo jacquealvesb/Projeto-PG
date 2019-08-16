@@ -17,9 +17,9 @@ pip install Pillow==2.2.2
 ### Parâmetros da câmera
 
 * Field of View (fov)
-* Posição (pos)
-* Ponto de Mira (target)
-* Vetor que aponta a orientação (up)
+* Posição (pos - px py pz)
+* Ponto de Mira (target - tx ty tz)
+* Vetor que aponta a orientação (up - ux uy uz)
 * Distância para o plano de imagem (f)
 
 ### Parâmetros dos materiais
