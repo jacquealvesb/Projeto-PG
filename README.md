@@ -58,5 +58,5 @@ esfera cx cy cz r nomeMaterialN
 Para rodar o código, inserir o comando a seguir no terminal na pasta do projeto:
 
 ```
-python main.py
+python New/main.py
 ```
